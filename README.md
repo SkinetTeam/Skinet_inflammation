@@ -2,7 +2,8 @@
 
 The SKINET Project is meant to provide a segmentation of the different structures in kidney histological tissue (biopsy or nephrectomy).
 This is an updated version of the original [Skinet Tool](https://github.com/SkinetTeam/Skinet) that provides indicators to compute MEST-C score.
-It allows the segmentation of sclerotic and non sclerotic glomeruli, healthy or atrophic tubules, intra-glomerular lesions (mesangial hypercellularity, endocapillary hypercellularity, segmental glomerulosclerosis, crescents) and assessment of interstitial fibrosis.
+It allows the segmentation of sclerotic and non sclerotic glomeruli, healthy or atrophic tubules, peri-tubular capillaries and inflammatory cells in addition of the assessment of interstitial fibrosis.
+
 
 This repository contains all the project's code. 
 You can use our online inference tool to test our tool on your biopsies (tutorial in the "docs" folder). 
@@ -13,4 +14,5 @@ The project's code is based on [Matterport's Mask R-CNN](https://github.com/matt
 This project is a collaboration between a Nephrology team from [Dijon Burgundy Teaching Hospital](https://www.chu-dijon.fr/), [LEAD Laboratory](http://leadserv.u-bourgogne.fr/en/), and a student from [ESIREM](https://esirem.u-bourgogne.fr/), all located in Dijon, Burgundy, France.
 
 ## Inference tool
+https://colab.research.google.com/github/SkinetTeam/Skinet_inflammation/blob/main/Mask_R_CNN_Inference_Tool.ipynb
 
