@@ -1,0 +1,71 @@
+# Using the Inference Notebook with Google Colaboratory
+
+​	Using the Notebook Inference on Google Colaboratory will ask you a bit more of configuration. Common requirements and configuration are provided in the [Using the Inference Notebook](Using-the-Inference-Notebook.md) page. 
+
+## Index
+1. [Specific requirements](#1-specific-requirements)
+   * [Enabling GPU to accelerate the inference](#enabling-gpu-to-accelerate-the-inference)
+   * [Getting the files easily without upload](#getting-the-files-easily-without-upload)
+2. [Configuration of the notebook](#2-configuration-of-the-notebook)
+   * ["Connecting to Google Drive" cell](#connecting-to-google-drive-cell)
+   * ["Retrieving your image(s)" cell](#retrieving-your-images-cell)
+   * ["By copy from Google Drive" cell](#by-copy-from-google-drive-cell)
+   * ["Retrieving Weights File" cell](#retrieving-weights-file-cell)
+
+
+## 1. Specific requirements
+​	To run the notebook on Google Colaboratory, you will need a google account and uploading the required files somewhere in your Google Drive folder.
+
+### Enabling GPU to accelerate the inference
+
+For better performance, enable GPU under hardware accelerator: `Runtime` > `Change runtime type` or  `Edit` > `Notebook Settings` and then `'Hardware Accelerator' dropdown list` > `GPU`.
+
+
+
+![img/colab_enable_gpu.png](img/colab_enable_gpu.png)
+
+
+### Getting the files:
+The needed files are:
+- the images you want to infer (in a .jpg format), optionnaly with their annotation files (if you want to compare the CNN's prediction to your ground truth).
+
+
+## 2. Configuration of the notebook
+​	A few variables have to be set in order to be able to run the notebook on Google Colaboratory. These are essentially paths to the needed files in Google Drive.
+
+### "Connecting to Google Drive" cell 
+​	You can do this during the first execution, after completing all other configurations.  
+​	The first time this cell runs, a link will be prompted to allow Google Colaboratory to access your Google Drive folders. Follow the link, choose the account containing the required files (at least the weights file) and accept. Then copy the given link to the input text field under the first link you followed.
+
+### "Retrieving your image(s)" cell
+​	In this cell, you just have to choose the way you want to import your image(s) (and annotations files). Use the dropdown list on the right to choose if you want to upload directly the file(s) or if you want to import it/them from a Google Drive folder.
+
+### "By copy from Google Drive" cell
+​	If you chose to get the file(s) from Google Drive, Be sure to customize the 2 variables for Google Colab to be able find your file(s) in Google Drive.
+Let's say you have this hierarchy in your Google Drive:
+
+```
+Root directory of Google Drive
+  ├─── Directory1
+  └─── Directory2
+       ├─── images
+       │    ├─── example1.png
+       │    └─── example2.png
+```
+
+*   `execMode` should match the name of inference mode you will run with the images that will be retrieved;
+*   `customPathInDrive` must represent all the directories between the root directory and your image file. In the example, it would be `Directory2/images/`. Keep it empty if **the file is directly in the root directory** of Google Drive;
+*   `imageFilePath` must represent the file you want to upload. In the example, it would be `example1.png`. It can also be empty, if you want to import all the folder's images *(and annotations files if checkbox is checked)* directly to Google Colab, so in the example `example1.png` and `example2.png` would be imported;
+*    `annotationsFile` if checked or set to True, the tool will retrieve annotations files (actually JSON and XML files) from the same folder. Value is `True` or `False`, you can also use the checkbox on the right on Google Colaboratory to do that.
+
+Use the text fields available on the right or set directly the value.
+
+```Python
+[...]
+execMode = 'chain' 
+customPathInDrive = ""
+imageFilePath = ""
+annotationsFile = True
+[...]
+```
+
