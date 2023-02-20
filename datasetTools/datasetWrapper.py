@@ -60,16 +60,7 @@ INFLAMMATION_CLASSES = [
     {"id": 2, "name": "cpt", "color": "#64FE2E", "ignore": False}
 ]
 
-GLOM_CELLS_CLASSES = [
-    {"id": 0, "name": "Background", "color": "", "ignore": True},
-    {"id": 1, "name": "hile", "color": "#64FE2E", "ignore": False},
-    {"id": 2, "name": "imane1", "color": "#55007f", "ignore": False},
-    {"id": 3, "name": "imane2", "color": "#ff007f", "ignore": False},
-    {"id": 4, "name": "imane3", "color": "#55557f", "ignore": False},
-    {"id": 5, "name": "imane4", "color": "#ff557f", "ignore": False},
-    {"id": 6, "name": "imane4", "color": "#55aa7f", "ignore": False},
-    {"id": 7, "name": "imane5", "color": "#ffaa7f", "ignore": False}
-]
+
 def get_bbox_from_points(pts):
     """
     Return bbox from a points array
@@ -600,8 +591,6 @@ def startWrapper(rawDatasetPath: str, datasetName: str = 'dataset_train', delete
             classesInfo = MESTC_GLOM_CLASSES
         elif mode == "inflammation":
             classesInfo = INFLAMMATION_CLASSES
-        elif mode == "glom_cells":
-            classesInfo = GLOM_CELLS_CLASSES
     # Creating masks for any image which has all required files and displaying progress
     start_time = time()
     for index, file in enumerate(images):
@@ -613,8 +602,6 @@ def startWrapper(rawDatasetPath: str, datasetName: str = 'dataset_train', delete
             fuseClassMasks(datasetName, file, "cortex", deleteBaseMasks=deleteBaseMasks, silent=True)
             cleanImage(datasetName, file, cleaningClasses='cortex')
         elif mode == "mest_glom":
-            cleanImage(datasetName, file, cleaningClasses='nsg', cleanMasks=True)
-        elif mode == "glom_cells" :
             cleanImage(datasetName, file, cleaningClasses='nsg', cleanMasks=True)
         elif mode == "inflammation":
             cleanImage(datasetName, file, cleaningClasses='cortex', cleanMasks=True,

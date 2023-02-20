@@ -13,9 +13,6 @@ import json
 from xml.dom import minidom
 
 import numpy as np
-import sys
-sys.path.append('C:/Users/Anwender/anaconda3/envs/Skinet/Lib/site-packages')
-
 import cv2
 
 from mrcnn.Config import Config

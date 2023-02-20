@@ -12,17 +12,18 @@ import cv2
 import numpy as np
 
 from common_utils import combination, formatTime, progressBar, progressText
-from mrcnn import utils, datasetDivider as dD
+from datasetTools import datasetDivider as dD
+from mrcnn import utils
 from mrcnn.Config import Config, DynamicMethod
 
 
-def fuse_results(results, image_info: dict, division_size: int = 1024, cortex_size=None, config: Config = None):
+def fuse_results(results, image_info: dict, division_size: int = 1024, resize=None, config: Config = None):
     """
         Fuse results of multiple predictions (divisions for example)
         :param results: list of the results of the predictions
         :param image_info: the input image informations
         :param division_size: Size of a division
-        :param cortex_size: If given, represents the resized shape of the cortex image
+        :param resize: If given, represents the resized shape of the image
         :param config: config of the network
         :return: same structure contained in results
         """
@@ -43,8 +44,8 @@ def fuse_results(results, image_info: dict, division_size: int = 1024, cortex_si
 
     div_side_length = results[0]['masks'].shape[0]
     use_mini_mask = config is not None and config.is_using_mini_mask()
-    height = image_info['HEIGHT'] if cortex_size is None else cortex_size[0]
-    width = image_info['WIDTH'] if cortex_size is None else cortex_size[1]
+    height = image_info['HEIGHT'] if resize is None else resize[0]
+    width = image_info['WIDTH'] if resize is None else resize[1]
 
     # Counting total sum of predicted masks
     size = 0
@@ -999,6 +1000,13 @@ def filter_on_border_masks(fused_results, image, onBorderThreshold=0.25, classes
                 duration = f"Duration = {formatTime(round(time() - start_time))}"
             if idx % displayStep == 0 or iterator == total:
                 progressBar(iterator, total, prefix=displayProgress, suffix=duration)
+
+    if displayProgress is not None and duration == "":
+        if total == 0:
+            duration = "Skipped (nothing to do)"
+        else:
+            duration = f"Duration = {formatTime(round(time() - start_time))}"
+        progressBar(1, 1, prefix=displayProgress, suffix=duration)
 
     # Deletion of unwanted results
     scores = np.delete(scores, toDelete)

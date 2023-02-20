@@ -190,10 +190,6 @@ def sortImages(datasetPath: str, unusedDirPath: str = None, mode: str = "main"):
         NOT_TO_COUNT.extend(["cortex", "tubule_sain", "tubule_atrophique", "pac", "vaisseau",
                              "artefact", "veine", "nsg", "intima", "media"])
         baseClass = "cortex"
-    elif mode=="glom_cells":
-        NOT_TO_COUNT.extend(["nsg_complet", "nsg_partiel", "tubule_sain", "tubule_atrophique", "vaisseau",
-                             "intima", "media", "pac", "artefact", "veine", "medullaire", "capsule"])
-        baseClass = "nsg"
     else:
         print(f"Mode {mode} is not yet supported")
         return
@@ -657,100 +653,6 @@ def generateInflammationDataset(rawDataset: str, outputDataset="nephrology_infla
             json.dump(recreateInfo, recreateFile, indent="\t")
     print("\nDataset made, nothing left to do")
 
-def generate_glom_cells_Dataset(rawDataset='raw_dataset', tempDataset='temp_dataset', unusedDirPath='nephrology_dataset_unused',
-                    mainDataset='main_dataset', mainDatasetUnusedDirPath='main_dataset_unused',
-                    deleteBaseMasks=True, adapter: AnnotationAdapter = None, imageFormat="jpg",
-                    recreateValList=None, separateDivInsteadOfImage=False, separateByPatient=True,
-                    divisionSize=1024, minDivisionOverlapping=0.33, cleanBeforeStart=False):
-    """
-    Generates datasets folder from a base directory, all paths are customizable, and it can also remove previous
-    directories
-    :param rawDataset: path to the base directory
-    :param tempDataset: path to a temporary directory
-    :param unusedDirPath: path to the unused files' directory
-    :param mainDataset: path to the main dataset directory, used to also define main training and validation directories
-    :param mainDatasetUnusedDirPath: path to unused files' directory of main dataset
-    :param deleteBaseMasks: whether to delete base masks or not
-    :param adapter: the adapter used to read annotations files, if None, will detect automatically which one to use
-    :param imageFormat: the image format to use for the datasets
-    :param recreateValList: list of images to use to recreate val dataset
-    :param separateDivInsteadOfImage: if True, divisions of same image can be separated into training and val
-                                      directories
-    :param separateByPatient: if True and not separateDivInsteadOfImage, will create validation directory based on
-                              patient
-    :param divisionSize: the size of a division, default is 1024
-    :param minDivisionOverlapping: the min overlapping between two divisions, default is 33%
-    :param cleanBeforeStart: if True, will delete previous directories that could still exist
-    :return:
-    """
-    if cleanBeforeStart:
-        # Removing temp directories
-        import shutil
-        dirToDel = [tempDataset, unusedDirPath,
-                    'temp_' + mainDataset + '_val', mainDataset + '_val', mainDataset + '_train']
-        for directory in dirToDel:
-            if os.path.exists(directory):
-                shutil.rmtree(directory, ignore_errors=True)
-
-    # Creating masks and making per image directories
-    dW.startWrapper(rawDataset, tempDataset, deleteBaseMasks=deleteBaseMasks,
-                    adapter=adapter, imageFormat=imageFormat, mode="glom_cells")
-    infoNephrologyDataset(tempDataset, baseClass='nsg')
-    checkNSG(tempDataset)
-
-    # Sorting images to keep those that can be used
-    sortImages(datasetPath=tempDataset, unusedDirPath=unusedDirPath, mode="main")
-
-    recreateInfo = {"mode": "glom_cells", "temp_dataset": tempDataset, "unused_dir_path": unusedDirPath,
-                    "main_dataset": mainDataset, "main_dataset_unused_path": mainDatasetUnusedDirPath,
-                    "delete_base_masks": deleteBaseMasks, "image_format": imageFormat,
-                    "separate": "div" if separateDivInsteadOfImage else ("patient" if separateByPatient else "images"),
-                    "division_size": divisionSize, "min_overlap_part": minDivisionOverlapping,
-                    "clean_before_start": cleanBeforeStart, "val_dataset": []}
-    if separateDivInsteadOfImage:
-        # Dividing main dataset in 1024*1024 divisions
-        dD.divideDataset(tempDataset, mainDataset, squareSideLength=divisionSize,
-                         min_overlap_part=minDivisionOverlapping, verbose=1)
-        infoNephrologyDataset(mainDataset, baseClass='nsg')
-
-        # If you want to keep all cortex files comment dW.cleanCortexDir() lines
-        # If you want to check them and then delete them, comment these lines too and after checking use them
-        # dW.cleanFusedClassDir(tempDataset, 'cortex')
-        # dW.cleanFusedClassDir(mainDataset, 'cortex')
-
-        # Removing unusable images by moving them into a specific directory
-        sortImages(mainDataset, unusedDirPath=mainDatasetUnusedDirPath)
-        # Taking some images from the main dataset to make the validation dataset
-        recreateInfo["val_dataset"] = createValDataset(mainDataset, rename=True, recreateInfo=recreateValList)
-    else:  # To avoid having divisions of same image to be dispatched in main and validation dataset
-        # Removing unusable images by moving them into a specific directory
-        if separateByPatient:
-            recreateInfo["val_dataset"] = createValDatasetByPeople(rawDataset=rawDataset, datasetPath=tempDataset,
-                                                                   valDatasetPath='temp_' + mainDataset + '_val',
-                                                                   nbPatientBiopsie=7, nbPatientNephrectomy=3,
-                                                                   recreateInfo=recreateValList)
-        else:
-            # Taking some images from the main dataset to make the validation dataset
-            recreateInfo["val_dataset"] = createValDataset(tempDataset, valDatasetPath='temp_' + mainDataset + '_val',
-                                                           rename=False, recreateInfo=recreateValList)
-
-        # Dividing the main dataset after having separated images for the validation dataset
-        # then removing unusable divisions
-        dD.divideDataset(tempDataset, mainDataset + '_train', squareSideLength=divisionSize,
-                         min_overlap_part=minDivisionOverlapping, verbose=1)
-        sortImages(mainDataset + '_train', unusedDirPath=mainDatasetUnusedDirPath)
-
-        # Same thing with the validation dataset directly
-        dD.divideDataset('temp_' + mainDataset + '_val', mainDataset + '_val', squareSideLength=divisionSize,
-                         min_overlap_part=minDivisionOverlapping, verbose=1)
-        sortImages(mainDataset + '_val', unusedDirPath=mainDatasetUnusedDirPath)
-
-    infoNephrologyDataset(mainDataset + '_train', baseClass='nsg')
-    infoNephrologyDataset(mainDataset + '_val', baseClass='nsg')
-    if recreateValList is None or len(recreateValList) == 0:
-        with open(f"dataset_{formatDate()}.json", 'w') as recreateFile:
-            json.dump(recreateInfo, recreateFile, indent="\t")
-    print("\nDataset made, nothing left to do")
 
 def regenerateDataset(rawDataset, recreateFilePath, adapter: AnnotationAdapter = None):
     with open(recreateFilePath, 'r') as recreateFile:
