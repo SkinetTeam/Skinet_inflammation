@@ -1,4 +1,4 @@
-# SKINET (Segmentation of the KIdney through a Neural nETwork) Project - MEST-C
+# SKINET (Segmentation of the KIdney through a Neural nETwork) Project - Inflammation
 
 The SKINET Project is meant to provide a segmentation of the different structures in kidney histological tissue (biopsy or nephrectomy).
 This is an updated version of the original [Skinet Tool](https://github.com/SkinetTeam/Skinet) that provides indicators to compute MEST-C score.
