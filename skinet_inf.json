@@ -198,7 +198,7 @@
                 "roi_size": 1024,
                 "min_overlap_part": null,
                 "mini_mask": 64,
-                "min_confidence": 0.7,
+                "min_confidence": 0.1,
                 "allow_sparse": false
             },
             "post_processing": [
